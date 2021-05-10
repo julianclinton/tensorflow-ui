@@ -2,21 +2,14 @@
   "name": "tensorflow-ui",
   "version": "0.1.0",
   "private": true,
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/julianclinton/tensorflow-ui.git"
-  },
-  "author": "",
-  "bugs": {
-    "url": "https://github.com/julianclinton/tensorflow-ui/issues"
-  },
-  "homepage": "https://github.com/julianclinton/tensorflow-ui#readme",
   "dependencies": {
     "@tensorflow/tfjs": "^3.6.0",
     "@testing-library/jest-dom": "^5.12.0",
     "@testing-library/react": "^11.2.6",
     "@testing-library/user-event": "^12.8.3",
+    "bootstrap": "^5.0.0",
     "react": "^17.0.2",
+    "react-bootstrap": "^1.5.2",
     "react-dom": "^17.0.2",
     "react-scripts": "4.0.3",
     "web-vitals": "^1.1.2"
