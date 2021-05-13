@@ -51,18 +51,22 @@ export const BodySegmentation = (props) => {
   }
   
   const updateApplyPanel = async (modelApplyData) => {
-    if (modelApplyData.allPoses) {
+    let data
+    if (modelApplyData && modelApplyData.allPoses && modelApplyData.allPoses.length > 0) {
       // For now assume a consistent order which is the same as BODY_PARTS
-      const data = modelApplyData.allPoses[0].keypoints.map((entry) => entry.score)
+      data = modelApplyData.allPoses[0].keypoints.map((entry) => entry.score)
       // console.log(data)
-      setSegmentationData([
-        {
-          name: "confidences",
-          data: data
-        }
-      ])
+    } else {
+      data = BODY_PARTS.map(entry => 0.0)
     }
-  }
+
+    setSegmentationData([
+      {
+        name: "confidences",
+        data: data
+      }
+    ])
+}
 
   const applySegmentationModel = async (video) => {
     /**
@@ -88,6 +92,7 @@ export const BodySegmentation = (props) => {
       <h1>Body Segmentation</h1>
       { model &&
         <VideoPanel 
+          applyRateMS={250}
           applyModel={applySegmentationModel}
           applyPanel={<Chart options={DISPLAY_OPTIONS} series={segmentationData} type="bar" height={480} />}
         />

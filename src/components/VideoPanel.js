@@ -67,7 +67,7 @@ export const VideoPanel = (props) => {
 
   useEffect(() => {
     if (videoAvailable && !predictor) {
-      setPredictor(setInterval(predict, 500))
+      setPredictor(setInterval(predict, props.applyRateMS || 500))
     } else if (predictor) {
       clearInterval(predictor)
       setPredictor(null)
@@ -100,6 +100,7 @@ export const VideoPanel = (props) => {
 }
 
 VideoPanel.propTypes = {
+  applyRateMS: PropTypes.number,
   applyModel: PropTypes.func.isRequired,
   applyPanel: PropTypes.object.isRequired
 }

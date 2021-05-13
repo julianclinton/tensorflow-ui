@@ -1,12 +1,11 @@
-import { Switch, Route } from "react-router-dom";
+import { Switch, Route } from "react-router-dom"
 import Container from 'react-bootstrap/Container'
 import Nav from 'react-bootstrap/Nav'
 import Navbar from 'react-bootstrap/Navbar'
 import NavDropdown from 'react-bootstrap/NavDropdown'
-import Home from './views/Home';
-import NotFoundPage from './views/NotFoundPage';
-import BodySegmentation from './views/BodySegmentation';
-import ObjectDetection from './views/ObjectDetection';
+import Home from './views/Home'
+import NotFoundPage from './views/NotFoundPage'
+import { TASK_LINKS } from './util/constants'
 
 const App = () => {
   return (
@@ -18,20 +17,18 @@ const App = () => {
           <Nav className="mr-auto">
             <Nav.Link href="/">Home</Nav.Link>
             <NavDropdown title="Tasks" id="basic-nav-dropdown">
-              <NavDropdown.Item href="/bodysegmentation">Body segmentation</NavDropdown.Item>
-              <NavDropdown.Item href="/modeldetection">Object detection</NavDropdown.Item>
+              { TASK_LINKS.map(entry => <NavDropdown.Item href={entry.ref}>{entry.label}</NavDropdown.Item>) }
             </NavDropdown>
           </Nav>
         </Navbar.Collapse>
       </Navbar>      
       <Switch>
         <Route exact path="/" component={Home} />
-        <Route path="/bodysegmentation" title="Body Segmentation" component={BodySegmentation} />
-        <Route path="/modeldetection" title="Object Detection" component={ObjectDetection} />
+        { TASK_LINKS.map(entry => <Route path={entry.ref} title={entry.label} component={entry.component}/>) }
         <Route path="*" component={NotFoundPage} />
       </Switch>
     </Container>
   );
 }
 
-export default App;
+export default App
