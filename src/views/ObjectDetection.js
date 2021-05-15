@@ -1,5 +1,6 @@
 import React, { Fragment, useState, useEffect } from 'react'
 import Chart from 'react-apexcharts'
+import Loading from '../components/Loading'
 import VideoPanel from '../components/VideoPanel'
 require('@tensorflow/tfjs-backend-cpu')
 require('@tensorflow/tfjs-backend-webgl')
@@ -36,7 +37,6 @@ export const ObjectSegmentation = (props) => {
           y: entry.score
         }
       })
-      // console.log(data)
       setSegmentationData([
         {
           name: "confidences",
@@ -47,10 +47,10 @@ export const ObjectSegmentation = (props) => {
   }
 
   const applySegmentationModel = async (video) => {
-     const modelApplyData = await await model.detect(video)
-     if (modelApplyData) {
-       updateApplyPanel(modelApplyData)
-     }
+    const modelApplyData = await await model.detect(video)
+    if (modelApplyData) {
+      updateApplyPanel(modelApplyData)
+    }
   }
 
   useEffect(() => {
@@ -59,13 +59,15 @@ export const ObjectSegmentation = (props) => {
 
   return (
     <Fragment>
-      <h1>Object Detection</h1>
-      { model &&
+      <h2>Object Detection</h2>
+      { (model &&
         <VideoPanel
           applyRateMS={500}
           applyModel={applySegmentationModel}
-          applyPanel={<Chart options={DISPLAY_OPTIONS} series={segmentationData} type="bar" height={480} />}
-        />
+        >
+          {<Chart options={DISPLAY_OPTIONS} series={segmentationData} type="bar" height='100%'/>}
+        </VideoPanel>)
+        || <Loading message={'Loading model...'}/>
       }
     </Fragment>
   )
