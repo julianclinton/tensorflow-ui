@@ -5,6 +5,7 @@ import Chart from 'react-apexcharts'
 import Loading from '../components/Loading'
 import VideoPanel from '../components/VideoPanel'
 import { BODY_PARTS, BAR_CHART_DEFAULTS } from '../util/constants'
+import { drawBoundingBox, drawSkeleton } from '../util/drawing'
 import '@tensorflow/tfjs-backend-webgl'
 const posenet = require('@tensorflow-models/posenet')
 
@@ -32,7 +33,7 @@ export const PoseDetection = (props) => {
   const [settings, setSettings] = useState({
     bodyThreshold: 0.3
   })
-  const [segmentationData, setSegmentationData] = useState(createDefaultSeries())
+  const [chartData, setChartData] = useState(createDefaultSeries())
 
   const loadModel = async () => {
     setModel(await posenet.load({
@@ -43,12 +44,25 @@ export const PoseDetection = (props) => {
     }))
   }
   
+  const updateCanvas = async (ctx, modelApplyData, settings) => {
+    if (modelApplyData.length > 0) {
+      modelApplyData.forEach((body, bodyIndex) => {
+        // Apply the threshold when low confidence that this person exists
+        // console.log(`body ${bodyIndex}: score=${body.score}, threshold=${settings.bodyThreshold}`)
+        if (body.score > settings.bodyThreshold) {
+          drawBoundingBox(body.keypoints, ctx)
+          drawSkeleton(body.keypoints, 0.1, ctx, 1)
+        }
+      })
+    }
+  }
+
   const updateApplyPanel = async (modelApplyData, settings) => {
     let data = []
     if (modelApplyData && modelApplyData.length > 0) {
       modelApplyData.forEach((body, bodyIndex) => {
         // Apply the threshold when low confidence that this person exists
-        console.log(`body ${bodyIndex}: score=${body.score}, threshold=${settings.bodyThreshold}`)
+        // console.log(`body ${bodyIndex}: score=${body.score}, threshold=${settings.bodyThreshold}`)
         if (body.score > settings.bodyThreshold) {
           const bodyData = body.keypoints.map((entry) => {
               return {
@@ -67,14 +81,15 @@ export const PoseDetection = (props) => {
       data = createDefaultSeries()
     }
 
-    setSegmentationData(data)
+    setChartData(data)
 }
 
   const applySegmentationModel = async (video, settings) => {
-     const modelApplyData = await model.estimateMultiplePoses(video)
-     if (modelApplyData) {
-       updateApplyPanel(modelApplyData, settings)
-     }
+    let modelApplyData = await model.estimateMultiplePoses(video)
+    if (modelApplyData) {
+      updateApplyPanel(modelApplyData, settings)
+    }
+    return modelApplyData
   }
 
   useEffect(() => {
@@ -109,8 +124,9 @@ export const PoseDetection = (props) => {
           settings={settings}
           applyRateMS={250}
           applyModel={(source) => applySegmentationModel(source, settings)}
+          updateCanvas={(ctx, modelData) => updateCanvas(ctx, modelData, settings)}
         >
-          {<Chart options={DISPLAY_OPTIONS} series={segmentationData} type='bar' height='100%'/>}
+          {<Chart options={DISPLAY_OPTIONS} series={chartData} type='bar' height='100%'/>}
         </VideoPanel>)
         || <Loading message={'Loading model...'}/>
       }

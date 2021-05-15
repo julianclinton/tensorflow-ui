@@ -5,6 +5,7 @@ import Chart from 'react-apexcharts'
 import Loading from '../components/Loading'
 import VideoPanel from '../components/VideoPanel'
 import { BODY_PARTS, BAR_CHART_DEFAULTS } from '../util/constants'
+import { drawBoundingBox, drawSkeleton } from '../util/drawing'
 import '@tensorflow/tfjs-backend-webgl'
 const bodyPix = require('@tensorflow-models/body-pix')
 
@@ -33,13 +34,13 @@ export const BodySegmentation = (props) => {
     segmentationMode: 'segmentPersonParts',
     bodyThreshold: 0.3
   })
-  const [segmentationData, setSegmentationData] = useState(createDefaultSeries())
+  const [chartData, setChartData] = useState(createDefaultSeries())
 
   const loadModel = async () => {
     setModel(await bodyPix.load(/** optional arguments, see docs **/))
   }
   
-  const updateApplyPanel = async (modelApplyData, settings) => {
+  const getFeatureData = (modelApplyData, settings) => {
     let featureData
     switch (settings.segmentationMode) {
       case 'segmentPerson':
@@ -51,12 +52,31 @@ export const BodySegmentation = (props) => {
       default:
         featureData = null
     }
+    return featureData
+  }
+
+  const updateCanvas = async (ctx, modelApplyData, settings) => {
+    const featureData = getFeatureData(modelApplyData, settings)
+    if (featureData) {
+      featureData.forEach((body, bodyIndex) => {
+        // Apply the threshold when low confidence that this person exists
+        // console.log(`body ${bodyIndex}: score=${body.score}, threshold=${settings.bodyThreshold}`)
+        if (body.score > settings.bodyThreshold) {
+          drawBoundingBox(body.keypoints, ctx)
+          drawSkeleton(body.keypoints, 0.1, ctx, 1)
+        }
+      })
+    }
+  }
+
+  const updateApplyPanel = async (modelApplyData, settings) => {
+    const featureData = getFeatureData(modelApplyData, settings)
 
     let data = []
     if (featureData) {
       featureData.forEach((body, bodyIndex) => {
         // Apply the threshold when low confidence that this person exists
-        console.log(`body ${bodyIndex}: score=${body.score}, threshold=${settings.bodyThreshold}`)
+        // console.log(`body ${bodyIndex}: score=${body.score}, threshold=${settings.bodyThreshold}`)
         if (body.score > settings.bodyThreshold) {
           const bodyData = body.keypoints.map((entry) => {
               return {
@@ -75,12 +95,10 @@ export const BodySegmentation = (props) => {
       data = createDefaultSeries()
     }
 
-    setSegmentationData(data)
+    setChartData(data)
   }
 
   const applySegmentationModel = async (video, settings) => {
-    console.log('applySegmentationModel')
-    console.log(settings)
     /**
      * One of:
      *   - net.segmentPerson
@@ -103,12 +121,14 @@ export const BodySegmentation = (props) => {
         fn = null
     }
 
+    let modelApplyData
     if (fn) {
-      const modelApplyData = await fn.call(model, video)
+      modelApplyData = await fn.call(model, video)
       if (modelApplyData) {
         updateApplyPanel(modelApplyData, settings)
       }
     }
+    return modelApplyData
   }
 
   const onSegmentationChange = (event) => {
@@ -147,8 +167,6 @@ export const BodySegmentation = (props) => {
     </Form.Group>
   </Form>
 
-  console.log('Primary')
-  console.log(settings)
   return (
     <Fragment>
       <h2>Body Segmentation</h2>
@@ -156,10 +174,11 @@ export const BodySegmentation = (props) => {
         <VideoPanel
           controlPanel={controlPanel}
           settings={settings}
-          applyRateMS={500}
+          applyRateMS={250}
           applyModel={(source) => applySegmentationModel(source, settings)}
+          updateCanvas={(ctx, modelData) => updateCanvas(ctx, modelData, settings)}
         >
-          {<Chart options={DISPLAY_OPTIONS} series={segmentationData} type='bar' height='100%'/>}
+          {<Chart options={DISPLAY_OPTIONS} series={chartData} type='bar' height='100%'/>}
         </VideoPanel>)
         || <Loading message={'Loading model...'}/>
       }
