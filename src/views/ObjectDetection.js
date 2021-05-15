@@ -2,24 +2,12 @@ import React, { Fragment, useState, useEffect } from 'react'
 import Chart from 'react-apexcharts'
 import Loading from '../components/Loading'
 import VideoPanel from '../components/VideoPanel'
+import { BAR_CHART_DEFAULTS } from '../util/constants'
 require('@tensorflow/tfjs-backend-cpu')
 require('@tensorflow/tfjs-backend-webgl')
 const cocoSsd = require('@tensorflow-models/coco-ssd')
 
-const DISPLAY_OPTIONS = {
-  chart: {
-    id: "basic-bar"
-  },
-  plotOptions: {
-    bar: {
-      horizontal: true
-    }
-  },        
-  yaxis: {
-    min: 0.0,
-    max: 1.0
-  }
-}
+const DISPLAY_OPTIONS = { ...BAR_CHART_DEFAULTS }
 
 export const ObjectSegmentation = (props) => {
   const [model, setModel] = useState(null)

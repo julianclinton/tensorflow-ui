@@ -4,25 +4,14 @@ import RangeSlider from 'react-bootstrap-range-slider'
 import Chart from 'react-apexcharts'
 import Loading from '../components/Loading'
 import VideoPanel from '../components/VideoPanel'
-import { BODY_PARTS } from '../util/constants'
+import { BODY_PARTS, BAR_CHART_DEFAULTS } from '../util/constants'
 import '@tensorflow/tfjs-backend-webgl'
 const posenet = require('@tensorflow-models/posenet')
 
 const DISPLAY_OPTIONS = {
-  chart: {
-    id: "basic-bar"
-  },
-  plotOptions: {
-    bar: {
-      horizontal: true
-    }
-  },
+  ...BAR_CHART_DEFAULTS,
   xaxis: {
     categories: BODY_PARTS
-  },
-  yaxis: {
-    min: 0.0,
-    max: 1.0
   }
 }
 
@@ -106,7 +95,6 @@ export const PoseDetection = (props) => {
         min={0.0}
         max={1.0}
         step={0.02}
-        tooltip='on'
         onChange={onBodyThresholdChange}
       />   
     </Form.Group>
