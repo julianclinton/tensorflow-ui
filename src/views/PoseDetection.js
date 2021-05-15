@@ -1,4 +1,6 @@
 import React, { Fragment, useState, useEffect } from 'react'
+import Form from 'react-bootstrap/Form'
+import RangeSlider from 'react-bootstrap-range-slider'
 import Chart from 'react-apexcharts'
 import Loading from '../components/Loading'
 import VideoPanel from '../components/VideoPanel'
@@ -38,6 +40,9 @@ const createDefaultSeries = () => {
 
 export const PoseDetection = (props) => {
   const [model, setModel] = useState(null)
+  const [settings, setSettings] = useState({
+    bodyThreshold: 0.3
+  })
   const [segmentationData, setSegmentationData] = useState(createDefaultSeries())
 
   const loadModel = async () => {
@@ -49,12 +54,13 @@ export const PoseDetection = (props) => {
     }))
   }
   
-  const updateApplyPanel = async (modelApplyData) => {
+  const updateApplyPanel = async (modelApplyData, settings) => {
     let data = []
     if (modelApplyData && modelApplyData.length > 0) {
       modelApplyData.forEach((body, bodyIndex) => {
-        // Threshold when low confidence that this person exists
-        if (body.score > 0.3) {
+        // Apply the threshold when low confidence that this person exists
+        console.log(`body ${bodyIndex}: score=${body.score}, threshold=${settings.bodyThreshold}`)
+        if (body.score > settings.bodyThreshold) {
           const bodyData = body.keypoints.map((entry) => {
               return {
               x: entry.part,
@@ -75,19 +81,10 @@ export const PoseDetection = (props) => {
     setSegmentationData(data)
 }
 
-  const applySegmentationModel = async (video) => {
-    /**
-     * One of (see documentation below):
-     *   - net.segmentPerson
-     *   - net.segmentPersonParts
-     *   - net.segmentMultiPerson
-     *   - net.segmentMultiPersonParts
-     * See documentation for details on each method.
-     */
-     const modelApplyData = await await model.estimateMultiplePoses(video)
-     console.log(modelApplyData)
+  const applySegmentationModel = async (video, settings) => {
+     const modelApplyData = await model.estimateMultiplePoses(video)
      if (modelApplyData) {
-       updateApplyPanel(modelApplyData)
+       updateApplyPanel(modelApplyData, settings)
      }
   }
 
@@ -95,15 +92,37 @@ export const PoseDetection = (props) => {
     loadModel()
   }, [])
 
+  const onBodyThresholdChange = (event) => {
+    setSettings({ ...settings, bodyThreshold: event.target.value })
+  }
+  
+  const controlPanel = <Form>
+    <Form.Group>
+      <Form.Label>
+        Body threshold
+      </Form.Label>
+      <RangeSlider
+        value={settings.bodyThreshold}
+        min={0.0}
+        max={1.0}
+        step={0.02}
+        tooltip='on'
+        onChange={onBodyThresholdChange}
+      />   
+    </Form.Group>
+  </Form>
+
   return (
     <Fragment>
       <h2>Pose Detection</h2>
       { (model &&
         <VideoPanel 
+          controlPanel={controlPanel}
+          settings={settings}
           applyRateMS={250}
-          applyModel={applySegmentationModel}
+          applyModel={(source) => applySegmentationModel(source, settings)}
         >
-          {<Chart options={DISPLAY_OPTIONS} series={segmentationData} type="bar" height='100%'/>}
+          {<Chart options={DISPLAY_OPTIONS} series={segmentationData} type='bar' height='100%'/>}
         </VideoPanel>)
         || <Loading message={'Loading model...'}/>
       }

@@ -40,19 +40,17 @@ const createDefaultSeries = () => {
 
 export const BodySegmentation = (props) => {
   const [model, setModel] = useState(null)
-  const [settings] = useState({
+  const [settings, setSettings] = useState({
     segmentationMode: 'segmentPersonParts',
     bodyThreshold: 0.3
   })
-  // const [segmentationMode, setSegmentationMode] = useState('segmentPersonParts')
-  // const [bodyThreshold, setBodyThreshold] = useState(0.3)
   const [segmentationData, setSegmentationData] = useState(createDefaultSeries())
 
   const loadModel = async () => {
     setModel(await bodyPix.load(/** optional arguments, see docs **/))
   }
   
-  const updateApplyPanel = async (modelApplyData, segmentationMode) => {
+  const updateApplyPanel = async (modelApplyData, settings) => {
     let featureData
     switch (settings.segmentationMode) {
       case 'segmentPerson':
@@ -69,7 +67,7 @@ export const BodySegmentation = (props) => {
     if (featureData) {
       featureData.forEach((body, bodyIndex) => {
         // Apply the threshold when low confidence that this person exists
-        // console.log('body score=' + body.score + ', threshold=' + settings.bodyThreshold)
+        console.log(`body ${bodyIndex}: score=${body.score}, threshold=${settings.bodyThreshold}`)
         if (body.score > settings.bodyThreshold) {
           const bodyData = body.keypoints.map((entry) => {
               return {
@@ -89,9 +87,11 @@ export const BodySegmentation = (props) => {
     }
 
     setSegmentationData(data)
-}
+  }
 
   const applySegmentationModel = async (video, settings) => {
+    console.log('applySegmentationModel')
+    console.log(settings)
     /**
      * One of:
      *   - net.segmentPerson
@@ -117,19 +117,17 @@ export const BodySegmentation = (props) => {
     if (fn) {
       const modelApplyData = await fn.call(model, video)
       if (modelApplyData) {
-        updateApplyPanel(modelApplyData, settings.segmentationMode)
+        updateApplyPanel(modelApplyData, settings)
       }
     }
   }
 
   const onSegmentationChange = (event) => {
-    settings.segmentationMode = event.target.value
-    // setSettings({ ...settings, segmentationMode: event.target.value })
+    setSettings({ ...settings, segmentationMode: event.target.value })
   }
 
   const onBodyThresholdChange = (event) => {
-    settings.bodyThreshold = event.target.value
-    // setSettings({ ...settings, bodyThreshold: event.target.value })
+    setSettings({ ...settings, bodyThreshold: event.target.value })
   }
   
   useEffect(() => {
@@ -146,29 +144,34 @@ export const BodySegmentation = (props) => {
         <option value='segmentMultiPersonParts'>Multi-person parts</option>
       </Form.Control>
     </Form.Group>
-    <Form.Group as='div'>
-      <Form.Label>Body threshold</Form.Label>
+    <Form.Group>
+      <Form.Label>
+        Body threshold
+      </Form.Label>
       <RangeSlider
         value={settings.bodyThreshold}
         min={0.0}
         max={1.0}
-        step={0.05}
+        step={0.02}
         tooltip='on'
         onChange={onBodyThresholdChange}
       />   
     </Form.Group>
   </Form>
 
+  console.log('Primary')
+  console.log(settings)
   return (
     <Fragment>
       <h2>Body Segmentation</h2>
       { (model &&
         <VideoPanel
           controlPanel={controlPanel}
+          settings={settings}
           applyRateMS={500}
           applyModel={(source) => applySegmentationModel(source, settings)}
         >
-          {<Chart options={DISPLAY_OPTIONS} series={segmentationData} type="bar" height='100%'/>}
+          {<Chart options={DISPLAY_OPTIONS} series={segmentationData} type='bar' height='100%'/>}
         </VideoPanel>)
         || <Loading message={'Loading model...'}/>
       }

@@ -7,8 +7,8 @@ import ToggleButton from 'react-bootstrap/ToggleButton'
 
 export const VideoPanel = (props) => {
   const [scanning, setScanning] = useState(false)
-  const [predictor, setPredictor] = useState(null)
   const [videoAvailable, setVideoAvailable] = useState(false)
+  const scanTimer = useRef()
   const videoRef = useRef()
   const canvasRef = useRef()
 
@@ -27,17 +27,18 @@ export const VideoPanel = (props) => {
   
   const enableVideo = () => {
     console.log('enableVideo')
-    if (videoRef.current) {
-      if (!videoRef.current.onloadeddata) {
-        videoRef.current.onloadeddata = (event) => {
+    const video = videoRef.current
+    if (video) {
+      if (!video.onloadeddata) {
+        video.onloadeddata = (event) => {
           console.log('setVideoAvailable=true')
           setVideoAvailable(true)
         }
-        videoRef.current.onended = (event) => {
+        video.onended = (event) => {
           console.log('setVideoAvailable=false')
           setVideoAvailable(false)
         }
-        videoRef.current.onerror = (event) => {
+        video.onerror = (event) => {
           console.log('setVideoAvailable=false')
           setVideoAvailable(false)
         }
@@ -45,7 +46,7 @@ export const VideoPanel = (props) => {
         if (navigator.mediaDevices.getUserMedia) {
           navigator.mediaDevices.getUserMedia({ video: true })
             .then((stream) => {
-              videoRef.current.srcObject = stream
+              video.srcObject = stream
             })
             .catch((err) => {
               console.log("Something went wrong!", err)
@@ -57,11 +58,12 @@ export const VideoPanel = (props) => {
 
   const disableVideo = () => {
     console.log('disableVideo')
-    if (videoRef.current && videoRef.current.srcObject) {
-      videoRef.current.srcObject.getTracks().forEach(track => {
+    const video = videoRef.current
+    if (video && video.srcObject) {
+      video.srcObject.getTracks().forEach(track => {
         track.stop()
       })
-      videoRef.current.srcObject = null        
+      video.srcObject = null        
     }
     setVideoAvailable(false)
   }
@@ -71,15 +73,18 @@ export const VideoPanel = (props) => {
     return () => disableVideo()
   }, [])
 
-  const onScanningChange = (event) => {
-    const scanning = event.currentTarget.checked
-    if (scanning && !predictor) {
-      setPredictor(setInterval(performScan, props.applyRateMS || 500))
-    } else if (predictor) {
-      clearInterval(predictor)
-      setPredictor(null)
+  useEffect(() => {
+    updateScanTimer(scanning)
+  }, [scanning, props.settings])
+
+  const updateScanTimer = (scan) => {
+    if (scanTimer.current) {
+      clearInterval(scanTimer.current)
+      scanTimer.current = null
     }
-    setScanning(scanning)
+    if (scan) {
+      scanTimer.current = setInterval(performScan, props.applyRateMS || 500)
+    }
   }
 
   return (
@@ -90,7 +95,7 @@ export const VideoPanel = (props) => {
               type="checkbox"
               variant="secondary"
               checked={scanning}
-              onChange={onScanningChange}
+              onChange={(e) => setScanning(e.currentTarget.checked)}
             > Scan</ToggleButton>
         </Col>
         <Col xs={8}>
@@ -122,6 +127,7 @@ export const VideoPanel = (props) => {
 
 VideoPanel.propTypes = {
   controlPanel: PropTypes.object,
+  settings: PropTypes.object, // required if controlPanel supplied
   applyRateMS: PropTypes.number,
   applyModel: PropTypes.func.isRequired
 }

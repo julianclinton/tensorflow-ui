@@ -29,7 +29,7 @@ export const ObjectSegmentation = (props) => {
     setModel(await cocoSsd.load(/** optional arguments, see docs **/))
   }
   
-  const updateApplyPanel = async (modelApplyData) => {
+  const updateApplyPanel = async (modelApplyData, settings) => {
     if (modelApplyData) {
       const data = modelApplyData.map((entry) => {
         return {
@@ -46,10 +46,10 @@ export const ObjectSegmentation = (props) => {
     }
   }
 
-  const applySegmentationModel = async (video) => {
-    const modelApplyData = await await model.detect(video)
+  const applySegmentationModel = async (video, settings) => {
+    const modelApplyData = await model.detect(video)
     if (modelApplyData) {
-      updateApplyPanel(modelApplyData)
+      updateApplyPanel(modelApplyData, settings)
     }
   }
 
@@ -63,9 +63,9 @@ export const ObjectSegmentation = (props) => {
       { (model &&
         <VideoPanel
           applyRateMS={500}
-          applyModel={applySegmentationModel}
+          applyModel={(source) => applySegmentationModel(source, null)}
         >
-          {<Chart options={DISPLAY_OPTIONS} series={segmentationData} type="bar" height='100%'/>}
+          {<Chart options={DISPLAY_OPTIONS} series={segmentationData} type='bar' height='100%'/>}
         </VideoPanel>)
         || <Loading message={'Loading model...'}/>
       }
