@@ -1,6 +1,6 @@
 {
-  "short_name": "TensforFlow Play",
-  "name": "TensforFlow Play React App",
+  "short_name": "TensforFlow UI",
+  "name": "TensforFlow UI React App",
   "icons": [
     {
       "src": "favicon.ico",
