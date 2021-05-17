@@ -102,9 +102,7 @@ export const PoseDetection = (props) => {
   
   const controlPanel = <Form>
     <Form.Group>
-      <Form.Label>
-        Body threshold
-      </Form.Label>
+      <Form.Label>Body threshold</Form.Label>
       <RangeSlider
         value={settings.bodyThreshold}
         min={0.0}

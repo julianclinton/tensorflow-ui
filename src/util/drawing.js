@@ -4,7 +4,7 @@ import * as posenet from '@tensorflow-models/posenet'
 
 export const SKELETON_COLOR = 'aqua'
 export const BOUNDING_BOX_COLOR = 'red'
-export const OBJECT_BOX_COLOR = 'green'
+export const OBJECT_BOX_COLOR = 'cyan'
 export const LINE_WIDTH = 2
 
 export const drawPoint = (ctx, y, x, r, color) => {

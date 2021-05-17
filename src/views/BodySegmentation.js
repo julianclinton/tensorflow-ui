@@ -1,5 +1,6 @@
 import React, { Fragment, useState, useEffect } from 'react'
 import Form from 'react-bootstrap/Form'
+import Col from 'react-bootstrap/Col'
 import RangeSlider from 'react-bootstrap-range-slider'
 import Chart from 'react-apexcharts'
 import Loading from '../components/Loading'
@@ -144,27 +145,27 @@ export const BodySegmentation = (props) => {
   }, [])
 
   const controlPanel = <Form>
-    <Form.Group>
-      <Form.Label>Segmentation</Form.Label>
-      <Form.Control value={settings.segmentationMode} as='select' onChange={onSegmentationChange}>
-        <option value='segmentPerson'>Person</option>
-        <option value='segmentPersonParts'>Person parts</option>
-        <option value='segmentMultiPerson'>Multi-person</option>
-        <option value='segmentMultiPersonParts'>Multi-person parts</option>
-      </Form.Control>
-    </Form.Group>
-    <Form.Group>
-      <Form.Label>
-        Body threshold
-      </Form.Label>
-      <RangeSlider
-        value={settings.bodyThreshold}
-        min={0.0}
-        max={1.0}
-        step={0.02}
-        onChange={onBodyThresholdChange}
-      />   
-    </Form.Group>
+    <Form.Row>
+      <Form.Group>
+        <Form.Label>Segmentation</Form.Label>
+        <Form.Control value={settings.segmentationMode} as='select' onChange={onSegmentationChange}>
+          <option value='segmentPerson'>Person</option>
+          <option value='segmentPersonParts'>Person parts</option>
+          <option value='segmentMultiPerson'>Multi-person</option>
+          <option value='segmentMultiPersonParts'>Multi-person parts</option>
+        </Form.Control>
+      </Form.Group>
+      <Form.Group>
+        <Form.Label>Body threshold</Form.Label>
+        <RangeSlider
+          value={settings.bodyThreshold}
+          min={0.0}
+          max={1.0}
+          step={0.02}
+          onChange={onBodyThresholdChange}
+        />   
+      </Form.Group>
+    </Form.Row>
   </Form>
 
   return (
