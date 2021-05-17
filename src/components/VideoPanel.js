@@ -5,6 +5,10 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import ToggleButton from 'react-bootstrap/ToggleButton'
 
+const VIDEO_WIDTH = 320
+const VIDEO_HEIGHT = 240
+const PANEL_STYLE = { border: '1px solid #000000' }
+
 export const VideoPanel = (props) => {
   const [scanning, setScanning] = useState(false)
   const [message, setMessage] = useState(null)
@@ -123,14 +127,14 @@ export const VideoPanel = (props) => {
         <Col xs={4}>
           <div>
             <video ref={videoRef} autoPlay={true} playsInline
-              width={VideoPanel.constants.defaultWidth}
-              height={VideoPanel.constants.defaultHeight}
-              style={VideoPanel.constants.defaultStyle}
+              width={VIDEO_WIDTH}
+              height={VIDEO_HEIGHT}
+              style={PANEL_STYLE}
             />
             <canvas ref={canvasRef}
-              width={VideoPanel.constants.defaultWidth}
-              height={VideoPanel.constants.defaultHeight}
-              style={VideoPanel.constants.defaultStyle}>
+              width={VIDEO_WIDTH}
+              height={VIDEO_HEIGHT}
+              style={PANEL_STYLE}>
             </canvas> 
           </div>
         </Col>
@@ -148,12 +152,6 @@ VideoPanel.propTypes = {
   applyRateMS: PropTypes.number,
   applyModel: PropTypes.func.isRequired,
   updateCanvas: PropTypes.func
-}
-
-VideoPanel.constants = {
-  defaultWidth: 320,
-  defaultHeight: 240,
-  defaultStyle: { border: '1px solid #000000' }
 }
 
 export default VideoPanel
