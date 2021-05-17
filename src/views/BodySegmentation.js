@@ -1,6 +1,5 @@
 import React, { Fragment, useState, useEffect } from 'react'
 import Form from 'react-bootstrap/Form'
-import Col from 'react-bootstrap/Col'
 import RangeSlider from 'react-bootstrap-range-slider'
 import Chart from 'react-apexcharts'
 import Loading from '../components/Loading'
