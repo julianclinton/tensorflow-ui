@@ -60,9 +60,7 @@ export const ObjectSegmentation = (props) => {
 
   const applySegmentationModel = async (video, settings) => {
     let modelApplyData = await model.detect(video)
-    if (modelApplyData) {
-      updateApplyPanel(modelApplyData, settings)
-    }
+    updateApplyPanel(modelApplyData, settings)
     return modelApplyData
   }
 

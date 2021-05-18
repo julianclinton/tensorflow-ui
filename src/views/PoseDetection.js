@@ -86,9 +86,7 @@ export const PoseDetection = (props) => {
 
   const applySegmentationModel = async (video, settings) => {
     let modelApplyData = await model.estimateMultiplePoses(video)
-    if (modelApplyData) {
-      updateApplyPanel(modelApplyData, settings)
-    }
+    updateApplyPanel(modelApplyData, settings)
     return modelApplyData
   }
 

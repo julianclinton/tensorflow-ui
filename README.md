@@ -36,4 +36,6 @@ Much of the code is taken from the TensorFlow demo models:
 - [Object Detection](https://github.com/tensorflow/tfjs-models/tree/master/coco-ssd)
 - [Body Segmentation](https://github.com/tensorflow/tfjs-models/tree/master/body-pix)
 - [Pose Detection](https://github.com/tensorflow/tfjs-models/tree/master/posenet)
+- [Image Classification](https://github.com/tensorflow/tfjs-models/tree/master/mobilenet)
+
 
