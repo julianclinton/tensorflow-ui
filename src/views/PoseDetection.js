@@ -6,6 +6,7 @@ import Loading from '../components/Loading'
 import VideoPanel from '../components/VideoPanel'
 import { BODY_PARTS, BAR_CHART_DEFAULTS } from '../util/constants'
 import { drawBoundingBox, drawSkeleton } from '../util/drawing'
+import { createDefaultCategorySeries } from '../util/charts'
 import '@tensorflow/tfjs-backend-webgl'
 const posenet = require('@tensorflow-models/posenet')
 
@@ -16,24 +17,12 @@ const DISPLAY_OPTIONS = {
   }
 }
 
-const createDefaultSeries = () => {
-  return [{
-    name: '-',
-    data: BODY_PARTS.map(entry => {
-      return {
-        x: entry,
-        y: 0.0
-      }
-    })
-  }]
-}
-
 export const PoseDetection = (props) => {
   const [model, setModel] = useState(null)
   const [settings, setSettings] = useState({
     bodyThreshold: 0.3
   })
-  const [chartData, setChartData] = useState(createDefaultSeries())
+  const [chartData, setChartData] = useState(createDefaultCategorySeries(BODY_PARTS))
 
   const loadModel = async () => {
     setModel(await posenet.load({
@@ -44,7 +33,7 @@ export const PoseDetection = (props) => {
     }))
   }
   
-  const updateCanvas = async (ctx, modelApplyData, settings) => {
+  const updateCanvas = async (source, canvas, ctx, modelApplyData, settings) => {
     if (modelApplyData.length > 0) {
       modelApplyData.forEach((body, bodyIndex) => {
         // Apply the threshold when low confidence that this person exists
@@ -78,7 +67,7 @@ export const PoseDetection = (props) => {
         }
       })
     } else {
-      data = createDefaultSeries()
+      data = createDefaultCategorySeries(BODY_PARTS)
     }
 
     setChartData(data)
@@ -120,7 +109,7 @@ export const PoseDetection = (props) => {
           settings={settings}
           applyRateMS={250}
           applyModel={(source) => applySegmentationModel(source, settings)}
-          updateCanvas={(ctx, modelData) => updateCanvas(ctx, modelData, settings)}
+          updateCanvas={(source, canvas, ctx, modelData) => updateCanvas(source, canvas, ctx, modelData, settings)}
         >
           {<Chart options={DISPLAY_OPTIONS} series={chartData} type='bar' height='100%'/>}
         </VideoPanel>)

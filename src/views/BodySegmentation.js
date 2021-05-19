@@ -8,6 +8,7 @@ import Loading from '../components/Loading'
 import VideoPanel from '../components/VideoPanel'
 import { BODY_PARTS, BAR_CHART_DEFAULTS } from '../util/constants'
 import { drawBoundingBox, drawSkeleton } from '../util/drawing'
+import { createDefaultCategorySeries } from '../util/charts'
 import '@tensorflow/tfjs-backend-webgl'
 const bodyPix = require('@tensorflow-models/body-pix')
 
@@ -18,25 +19,13 @@ const DISPLAY_OPTIONS = {
   }
 }
 
-const createDefaultSeries = () => {
-  return [{
-    name: '-',
-    data: BODY_PARTS.map(entry => {
-      return {
-        x: entry,
-        y: 0.0
-      }
-    })
-  }]
-}
-
 export const BodySegmentation = (props) => {
   const [model, setModel] = useState(null)
   const [settings, setSettings] = useState({
     segmentationMode: 'segmentPersonParts',
     bodyThreshold: 0.3
   })
-  const [chartData, setChartData] = useState(createDefaultSeries())
+  const [chartData, setChartData] = useState(createDefaultCategorySeries(BODY_PARTS))
 
   const loadModel = async () => {
     setModel(await bodyPix.load(/** optional arguments, see docs **/))
@@ -57,7 +46,7 @@ export const BodySegmentation = (props) => {
     return featureData
   }
 
-  const updateCanvas = async (ctx, modelApplyData, settings) => {
+  const updateCanvas = async (source, canvas, ctx, modelApplyData, settings) => {
     const featureData = getFeatureData(modelApplyData, settings)
     if (featureData) {
       featureData.forEach((body, bodyIndex) => {
@@ -94,7 +83,7 @@ export const BodySegmentation = (props) => {
         }
       })
     } else {
-      data = createDefaultSeries()
+      data = createDefaultCategorySeries(BODY_PARTS)
     }
 
     setChartData(data)
@@ -176,7 +165,7 @@ export const BodySegmentation = (props) => {
           settings={settings}
           applyRateMS={250}
           applyModel={(source) => applySegmentationModel(source, settings)}
-          updateCanvas={(ctx, modelData) => updateCanvas(ctx, modelData, settings)}
+          updateCanvas={(source, canvas, ctx, modelData) => updateCanvas(source, canvas, ctx, modelData, settings)}
         >
           {<Chart options={DISPLAY_OPTIONS} series={chartData} type='bar' height='100%'/>}
         </VideoPanel>)

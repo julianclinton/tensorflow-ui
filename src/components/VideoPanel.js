@@ -27,7 +27,7 @@ export const VideoPanel = (props) => {
           const ctx = canvas.getContext('2d')
           ctx.drawImage(video, 0, 0, video.width, video.height)
           if (modelData && props.updateCanvas) {
-            props.updateCanvas(ctx, modelData)
+            props.updateCanvas(video, canvas, ctx, modelData)
           }
         }
       } catch (err) {

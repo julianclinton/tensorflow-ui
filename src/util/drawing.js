@@ -2,10 +2,14 @@
 
 import * as posenet from '@tensorflow-models/posenet'
 
+export const GREEN = '#32EEDB'
+export const RED = '#FF2C35'
+export const BLUE = '#157AB3'
+
 export const SKELETON_COLOR = 'aqua'
-export const BOUNDING_BOX_COLOR = 'red'
+export const BOUNDING_BOX_COLOR = RED
 export const OBJECT_BOX_COLOR = 'cyan'
-export const LINE_WIDTH = 2
+export const SEGMENT_LINE_WIDTH = 2
 
 export const drawPoint = (ctx, y, x, r, color) => {
   ctx.beginPath()
@@ -21,7 +25,7 @@ export const drawSegment = ([ay, ax], [by, bx], color, scale, ctx) => {
   ctx.beginPath()
   ctx.moveTo(ax * scale, ay * scale)
   ctx.lineTo(bx * scale, by * scale)
-  ctx.lineWidth = LINE_WIDTH
+  ctx.lineWidth = SEGMENT_LINE_WIDTH
   ctx.strokeStyle = color
   ctx.stroke()
 }
@@ -74,6 +78,24 @@ export const drawSkeleton = (keypoints, minConfidence, ctx, scale = 1) => {
         toTuple(keypoints[0].position), toTuple(keypoints[1].position), SKELETON_COLOR,
         scale, ctx)
   })
+}
+
+export const distance = (a, b) => {
+  return Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2));
+}
+
+export const drawPath = (ctx, points, scale, closePath) => {
+  const region = new Path2D()
+  region.moveTo(points[0][0] * scale, points[0][1] * scale)
+  for (let i = 1; i < points.length; i++) {
+    const point = points[i]
+    region.lineTo(point[0] * scale, point[1] * scale)
+  }
+
+  if (closePath) {
+    region.closePath()
+  }
+  ctx.stroke(region)
 }
 
 /**

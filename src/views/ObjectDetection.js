@@ -33,7 +33,7 @@ export const ObjectSegmentation = (props) => {
     setModel(await cocoSsd.load())
   }
   
-  const updateCanvas = async (ctx, modelApplyData, settings) => {
+  const updateCanvas = async (source, canvas, ctx, modelApplyData, settings) => {
     if (modelApplyData.length > 0) {
       // Why scale of 0.5? Presumably default resolution is 640x480 which is double
       // the size of our canvas.
@@ -75,7 +75,7 @@ export const ObjectSegmentation = (props) => {
         <VideoPanel
           applyRateMS={250}
           applyModel={(source) => applySegmentationModel(source, null)}
-          updateCanvas={(ctx, modelData) => updateCanvas(ctx, modelData, null)}
+          updateCanvas={(source, canvas, ctx, modelData) => updateCanvas(source, canvas, ctx, modelData, null)}
         >
           {<Chart options={DISPLAY_OPTIONS} series={chartData} type='bar' height='100%'/>}
         </VideoPanel>)

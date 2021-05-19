@@ -7,6 +7,7 @@ import Chart from 'react-apexcharts'
 import Loading from '../components/Loading'
 import VideoPanel from '../components/VideoPanel'
 import { BAR_CHART_DEFAULTS } from '../util/constants'
+import { padChartSeries, createDefaultSeries } from '../util/charts'
 require('@tensorflow/tfjs-backend-cpu')
 require('@tensorflow/tfjs-backend-webgl')
 const mobilenet = require('@tensorflow-models/mobilenet')
@@ -34,23 +35,6 @@ const DISPLAY_OPTIONS = {
 const version = 2
 const alpha = 0.75
 
-const padChartSeries = (existing, topN) => {
-  for(let i = existing.length; i < topN; ++i) {
-    existing.push({
-      x: '??',
-      y: 0.0
-    })
-  }
-  return existing
-}
-
-const createDefaultSeries = (topN) => {
-  return [{
-    name: '-',
-    data: padChartSeries([], topN)
-  }]
-}
-
 export const ImageClassification = (props) => {
   const [model, setModel] = useState(null)
   const [settings, setSettings] = useState({
@@ -63,7 +47,7 @@ export const ImageClassification = (props) => {
     setModel(await mobilenet.load({version, alpha}))
   }
   
-  const updateCanvas = async (ctx, modelApplyData, settings) => {
+  const updateCanvas = async (source, canvas, ctx, modelApplyData, settings) => {
     if (modelApplyData.length > 0) {
     }
   }
@@ -142,7 +126,7 @@ export const ImageClassification = (props) => {
           settings={settings}
           applyRateMS={250}
           applyModel={(source) => applySegmentationModel(source, settings)}
-          updateCanvas={(ctx, modelData) => updateCanvas(ctx, modelData, settings)}
+          updateCanvas={(source, canvas, ctx, modelData) => updateCanvas(source, canvas, ctx, modelData, settings)}
         >
           {<Chart options={DISPLAY_OPTIONS} series={chartData} type='bar' height='100%'/>}
         </VideoPanel>)
