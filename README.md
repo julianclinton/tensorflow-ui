@@ -37,5 +37,7 @@ Much of the code is taken from the TensorFlow demo models:
 - [Body Segmentation](https://github.com/tensorflow/tfjs-models/tree/master/body-pix)
 - [Pose Detection](https://github.com/tensorflow/tfjs-models/tree/master/posenet)
 - [Image Classification](https://github.com/tensorflow/tfjs-models/tree/master/mobilenet)
+- [Face Landmarks Detection](https://github.com/tensorflow/tfjs-models/tree/master/face-landmarks-detection)
+
 
 
