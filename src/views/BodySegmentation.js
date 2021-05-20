@@ -89,7 +89,7 @@ export const BodySegmentation = (props) => {
     setChartData(data)
   }
 
-  const applySegmentationModel = async (video, settings) => {
+  const applySegmentationModel = async (video, canvas, settings) => {
     /**
      * One of:
      *   - net.segmentPerson
@@ -164,7 +164,7 @@ export const BodySegmentation = (props) => {
           controlPanel={controlPanel}
           settings={settings}
           applyRateMS={250}
-          applyModel={(source) => applySegmentationModel(source, settings)}
+          applyModel={(source, canvas) => applySegmentationModel(source, canvas, settings)}
           updateCanvas={(source, canvas, ctx, modelData) => updateCanvas(source, canvas, ctx, modelData, settings)}
         >
           {<Chart options={DISPLAY_OPTIONS} series={chartData} type='bar' height='100%'/>}

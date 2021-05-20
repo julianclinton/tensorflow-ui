@@ -1,18 +1,18 @@
 
-export const padChartSeries = (existing, maxLength) => {
+export const padChartSeries = (existing, maxLength, formatter) => {
   for (let i = existing.length; i < maxLength; ++i) {
     existing.push({
-      x: '??',
+      x: formatter ? formatter(i) : '??',
       y: 0.0
     })
   }
   return existing
 }
 
-export const createDefaultSeries = (maxLength) => {
+export const createDefaultSeries = (maxLength, formatter) => {
   return [{
     name: '-',
-    data: padChartSeries([], maxLength)
+    data: padChartSeries([], maxLength, formatter)
   }]
 }
 

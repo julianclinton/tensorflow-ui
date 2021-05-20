@@ -35,9 +35,10 @@ export const ObjectSegmentation = (props) => {
   
   const updateCanvas = async (source, canvas, ctx, modelApplyData, settings) => {
     if (modelApplyData.length > 0) {
-      // Why scale of 0.5? Presumably default resolution is 640x480 which is double
+      // Presumably default resolution is 640x480 so factor relative to
       // the size of our canvas.
-      drawBoundingBoxes(modelApplyData, 0.5, ctx)
+      const scale = canvas.width / 640.0
+      drawBoundingBoxes(modelApplyData, scale, ctx)
     }
   }
 
@@ -58,7 +59,7 @@ export const ObjectSegmentation = (props) => {
     }
   }
 
-  const applySegmentationModel = async (video, settings) => {
+  const applySegmentationModel = async (video, canvas, settings) => {
     let modelApplyData = await model.detect(video)
     updateApplyPanel(modelApplyData, settings)
     return modelApplyData
@@ -74,7 +75,7 @@ export const ObjectSegmentation = (props) => {
       { (model &&
         <VideoPanel
           applyRateMS={250}
-          applyModel={(source) => applySegmentationModel(source, null)}
+          applyModel={(source, canvas) => applySegmentationModel(source, canvas, null)}
           updateCanvas={(source, canvas, ctx, modelData) => updateCanvas(source, canvas, ctx, modelData, null)}
         >
           {<Chart options={DISPLAY_OPTIONS} series={chartData} type='bar' height='100%'/>}

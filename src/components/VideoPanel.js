@@ -5,11 +5,11 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import ToggleButton from 'react-bootstrap/ToggleButton'
 
-const VIDEO_WIDTH = 320
-const VIDEO_HEIGHT = 240
-const PANEL_STYLE = { border: '1px solid #000000' }
+export const VIDEO_WIDTH = 320
+export const VIDEO_HEIGHT = 240
+export const PANEL_STYLE = { border: '1px solid #000000' }
 
-export const VideoPanel = (props) => {
+const VideoPanel = (props) => {
   const [scanning, setScanning] = useState(false)
   const [message, setMessage] = useState(null)
   const [videoAvailable, setVideoAvailable] = useState(false)
@@ -22,7 +22,7 @@ export const VideoPanel = (props) => {
       const video = videoRef.current
       const canvas = canvasRef.current
       try {
-        const modelData = await props.applyModel(video)
+        const modelData = await props.applyModel(video, canvas)
         if (canvas) {
           const ctx = canvas.getContext('2d')
           ctx.drawImage(video, 0, 0, video.width, video.height)
@@ -105,6 +105,29 @@ export const VideoPanel = (props) => {
     }
   }
 
+  // If no children are in the right-hand panel then put the canvas there
+  // and make both the video and canvas larger
+  const hasRightPanel = props.children
+  const columnsFactor = (props.sourceSize === 'large' || !hasRightPanel) ? 1 : 0
+  const videoFactor = hasRightPanel ? columnsFactor : 2
+
+  const video = <video ref={videoRef} autoPlay={true} playsInline
+      width={VIDEO_WIDTH + (VIDEO_WIDTH/2 * videoFactor)}
+      height={VIDEO_HEIGHT + (VIDEO_HEIGHT/2 * videoFactor)}
+      style={PANEL_STYLE}
+    />
+
+  const canvas = <canvas ref={canvasRef}
+      width={VIDEO_WIDTH + (VIDEO_WIDTH/2 * videoFactor)}
+      height={VIDEO_HEIGHT + (VIDEO_HEIGHT/2 * videoFactor)}
+      style={PANEL_STYLE}>
+    </canvas> 
+
+  const leftItems = hasRightPanel ? [video, canvas] : [video]
+  const rightItems = hasRightPanel ? props.children : canvas
+  const leftPanelWidth = 4 + (2 * columnsFactor)
+  const rightPanelWidth = 8 - (2 * columnsFactor)
+
   return (
     <Container fluid>
       <Row>
@@ -116,30 +139,19 @@ export const VideoPanel = (props) => {
               onChange={(e) => setScanning(e.currentTarget.checked)}
             > Scan</ToggleButton>
         </Col>
-        <Col xs={3}>
+        <Col xs={leftPanelWidth - 1}>
           {message}
         </Col>
-        <Col xs={8}>
+        <Col xs={rightPanelWidth}>
           {props.controlPanel}
         </Col>
       </Row>
       <Row>
-        <Col xs={4}>
-          <div>
-            <video ref={videoRef} autoPlay={true} playsInline
-              width={VIDEO_WIDTH}
-              height={VIDEO_HEIGHT}
-              style={PANEL_STYLE}
-            />
-            <canvas ref={canvasRef}
-              width={VIDEO_WIDTH}
-              height={VIDEO_HEIGHT}
-              style={PANEL_STYLE}>
-            </canvas> 
-          </div>
+        <Col xs={leftPanelWidth}>
+          {leftItems}
         </Col>
-        <Col xs={8}>
-          {props.children}
+        <Col xs={rightPanelWidth} style={{ height: 2 * VIDEO_HEIGHT }}>
+          {rightItems}
         </Col>
       </Row>
     </Container>      
@@ -149,6 +161,7 @@ export const VideoPanel = (props) => {
 VideoPanel.propTypes = {
   controlPanel: PropTypes.object,
   settings: PropTypes.object, // required if controlPanel supplied
+  sourceSize: PropTypes.string,
   applyRateMS: PropTypes.number,
   applyModel: PropTypes.func.isRequired,
   updateCanvas: PropTypes.func

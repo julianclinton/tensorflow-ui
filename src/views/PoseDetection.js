@@ -35,9 +35,9 @@ export const PoseDetection = (props) => {
   
   const updateCanvas = async (source, canvas, ctx, modelApplyData, settings) => {
     if (modelApplyData.length > 0) {
-      modelApplyData.forEach((body, bodyIndex) => {
+      modelApplyData.forEach((body, index) => {
         // Apply the threshold when low confidence that this person exists
-        // console.log(`body ${bodyIndex}: score=${body.score}, threshold=${settings.bodyThreshold}`)
+        // console.log(`body ${index}: score=${body.score}, threshold=${settings.bodyThreshold}`)
         if (body.score > settings.bodyThreshold) {
           drawBoundingBox(body.keypoints, ctx)
           drawSkeleton(body.keypoints, 0.1, ctx, 1)
@@ -49,9 +49,9 @@ export const PoseDetection = (props) => {
   const updateApplyPanel = async (modelApplyData, settings) => {
     let data = []
     if (modelApplyData && modelApplyData.length > 0) {
-      modelApplyData.forEach((body, bodyIndex) => {
+      modelApplyData.forEach((body, index) => {
         // Apply the threshold when low confidence that this person exists
-        // console.log(`body ${bodyIndex}: score=${body.score}, threshold=${settings.bodyThreshold}`)
+        // console.log(`body ${index}: score=${body.score}, threshold=${settings.bodyThreshold}`)
         if (body.score > settings.bodyThreshold) {
           const bodyData = body.keypoints.map((entry) => {
               return {
@@ -61,7 +61,7 @@ export const PoseDetection = (props) => {
           })
 
           data.push({
-            name: `body-${bodyIndex + 1}`,
+            name: `body-${index + 1}`,
             data: bodyData
           })
         }
@@ -73,7 +73,7 @@ export const PoseDetection = (props) => {
     setChartData(data)
 }
 
-  const applySegmentationModel = async (video, settings) => {
+  const applySegmentationModel = async (video, canvas, settings) => {
     let modelApplyData = await model.estimateMultiplePoses(video)
     updateApplyPanel(modelApplyData, settings)
     return modelApplyData
@@ -108,7 +108,7 @@ export const PoseDetection = (props) => {
           controlPanel={controlPanel}
           settings={settings}
           applyRateMS={250}
-          applyModel={(source) => applySegmentationModel(source, settings)}
+          applyModel={(source, canvas) => applySegmentationModel(source, canvas, settings)}
           updateCanvas={(source, canvas, ctx, modelData) => updateCanvas(source, canvas, ctx, modelData, settings)}
         >
           {<Chart options={DISPLAY_OPTIONS} series={chartData} type='bar' height='100%'/>}

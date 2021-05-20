@@ -84,7 +84,7 @@ export const distance = (a, b) => {
   return Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2));
 }
 
-export const drawPath = (ctx, points, scale, closePath) => {
+export const drawPath = (ctx, points, color, scale, closePath) => {
   const region = new Path2D()
   region.moveTo(points[0][0] * scale, points[0][1] * scale)
   for (let i = 1; i < points.length; i++) {
@@ -95,6 +95,7 @@ export const drawPath = (ctx, points, scale, closePath) => {
   if (closePath) {
     region.closePath()
   }
+  ctx.strokeStyle = color
   ctx.stroke(region)
 }
 
