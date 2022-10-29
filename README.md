@@ -38,7 +38,7 @@ Much of the code is taken from the TensorFlow demo models:
 - [Pose Detection](https://github.com/tensorflow/tfjs-models/tree/master/posenet)
 - [Image Classification](https://github.com/tensorflow/tfjs-models/tree/master/mobilenet)
 - [Face Landmarks Detection](https://github.com/tensorflow/tfjs-models/tree/master/face-landmarks-detection)
-- [Hand Pose Detection](https://github.com/tensorflow/tfjs-models/tree/master/handpose)
+- [Hand Detection](https://github.com/tensorflow/tfjs-models/tree/master/handpose)
 
 
 

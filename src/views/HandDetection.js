@@ -30,7 +30,7 @@ const drawKeypoints = (keypoints, scale, ctx) => {
   }
 }
 
-export const HandPoseDetection = (props) => {
+export const HandDetection = (props) => {
   const [model, setModel] = useState(null)
 
   const loadModel = async () => {
@@ -64,7 +64,7 @@ export const HandPoseDetection = (props) => {
 
   return (
     <Fragment>
-      <h2>Hand Pose Detection</h2>
+      <h2>Hand Detection</h2>
       { (model &&
         <VideoPanel 
           applyRateMS={100}
@@ -78,4 +78,4 @@ export const HandPoseDetection = (props) => {
   )
 }
 
-export default HandPoseDetection
+export default HandDetection

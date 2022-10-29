@@ -3,7 +3,7 @@ import PoseDetection from '../views/PoseDetection'
 import ObjectDetection from '../views/ObjectDetection'
 import ImageClassification from '../views/ImageClassification'
 import FaceLandmarksDetection from '../views/FaceLandmarksDetection'
-import HandPoseDetection from '../views/HandPoseDetection'
+import HandDetection from '../views/HandDetection'
 
 export const TASK_LINKS = [
   {
@@ -27,9 +27,9 @@ export const TASK_LINKS = [
     component: FaceLandmarksDetection
   },
   {
-    label: 'Hand Pose Detection',
-    ref: '/handposedetection',
-    component: HandPoseDetection
+    label: 'Hand Detection',
+    ref: '/handdetection',
+    component: HandDetection
   },
   {
     label: 'Image Classification',
