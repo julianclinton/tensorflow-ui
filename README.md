@@ -34,11 +34,12 @@ Pose Detection
 Much of the code is taken from the TensorFlow demo models:
 
 - [Object Detection](https://github.com/tensorflow/tfjs-models/tree/master/coco-ssd)
-- [Body Segmentation](https://github.com/tensorflow/tfjs-models/tree/master/body-pix)
+- [Body Pix (Legacy)](https://github.com/tensorflow/tfjs-models/tree/master/body-pix)
 - [Pose Detection](https://github.com/tensorflow/tfjs-models/tree/master/posenet)
 - [Image Classification](https://github.com/tensorflow/tfjs-models/tree/master/mobilenet)
 - [Face Landmarks Detection](https://github.com/tensorflow/tfjs-models/tree/master/face-landmarks-detection)
 - [Hand Detection](https://github.com/tensorflow/tfjs-models/tree/master/handpose)
+- [Hand Pose Detection](https://github.com/tensorflow/tfjs-models/tree/master/hand-pose-detection)
 
 
 

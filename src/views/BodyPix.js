@@ -158,7 +158,7 @@ export const BodySegmentation = (props) => {
 
   return (
     <Fragment>
-      <h2>Body Segmentation</h2>
+      <h2>Body Pix (Legacy)</h2>
       { (model &&
         <VideoPanel
           controlPanel={controlPanel}

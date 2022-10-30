@@ -34,8 +34,8 @@ const NUM_IRIS_KEYPOINTS = 5
 
 const drawFaceFeatures = (result, settings, scale, ctx) => {
   if (result.length > 0) {
-    result.forEach(prediction => {
-      const keypoints = prediction.scaledMesh
+    result.forEach(face => {
+      const keypoints = face.keypoints.map((keypoint) => [keypoint.x, keypoint.y])
 
       if (settings.displayStyle === 'mesh') {
         ctx.strokeStyle = GREEN
@@ -43,10 +43,11 @@ const drawFaceFeatures = (result, settings, scale, ctx) => {
 
         for (let i = 0; i < TRIANGULATION.length / 3; i++) {
           const points = [
-            TRIANGULATION[i * 3], TRIANGULATION[i * 3 + 1],
-            TRIANGULATION[i * 3 + 2]
-          ].map(index => keypoints[index])
-
+            TRIANGULATION[i * 3],
+            TRIANGULATION[i * 3 + 1],
+            TRIANGULATION[i * 3 + 2],
+          ].map((index) => keypoints[index])
+  
           drawPath(ctx, points, GREEN, scale, true)
         }
       } else {
@@ -56,7 +57,7 @@ const drawFaceFeatures = (result, settings, scale, ctx) => {
           const x = scale * keypoints[i][0]
           const y = scale * keypoints[i][1]
 
-          ctx.beginPath();
+          ctx.beginPath()
           ctx.arc(x, y, 1 /* radius */, 0, 2 * Math.PI)
           ctx.fill()
         }
@@ -64,13 +65,13 @@ const drawFaceFeatures = (result, settings, scale, ctx) => {
 
       // Draw irises
       if (keypoints.length > NUM_KEYPOINTS) {
-        ctx.strokeStyle = RED;
+        ctx.strokeStyle = RED
         ctx.lineWidth = 1
 
         const leftCenter = keypoints[NUM_KEYPOINTS];
         const leftDiameterY = distance(
           keypoints[NUM_KEYPOINTS + 4],
-          keypoints[NUM_KEYPOINTS + 2]);
+          keypoints[NUM_KEYPOINTS + 2])
         const leftDiameterX = distance(
           keypoints[NUM_KEYPOINTS + 3],
           keypoints[NUM_KEYPOINTS + 1])
@@ -108,8 +109,12 @@ export const FaceLandmarksDetection = (props) => {
   const [chartData, setChartData] = useState(createDefaultSeries(3, categoryFormatter))
 
   const loadModel = async (settings) => {
-    setModel(await faceLandmarksDetection.load(faceLandmarksDetection.SupportedPackages.mediapipeFacemesh,
-      { maxFaces: settings.maxFaces }))
+    setModel(await faceLandmarksDetection.createDetector(faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh,
+      {
+        runtime: 'tfjs',
+        maxFaces: settings.maxFaces,
+        refineLandmarks: true
+      }))
   }
   
   const updateCanvas = async (source, canvas, ctx, modelApplyData, settings) => {
@@ -144,10 +149,7 @@ export const FaceLandmarksDetection = (props) => {
   }
 
   const applySegmentationModel = async (video, canvas, settings) => {
-    let modelApplyData = await model.estimateFaces({
-      input: video
-    })
-    // console.log(modelApplyData)
+    let modelApplyData = await model.estimateFaces(video, {flipHorizontal: false})
     updateApplyPanel(modelApplyData, settings)
     return modelApplyData
   }

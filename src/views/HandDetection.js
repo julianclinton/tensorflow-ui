@@ -64,7 +64,7 @@ export const HandDetection = (props) => {
 
   return (
     <Fragment>
-      <h2>Hand Detection</h2>
+      <h2>Hand Detection (Single)</h2>
       { (model &&
         <VideoPanel 
           applyRateMS={100}

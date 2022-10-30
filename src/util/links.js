@@ -1,15 +1,16 @@
-import BodySegmentation from '../views/BodySegmentation'
+import BodyPix from '../views/BodyPix'
 import PoseDetection from '../views/PoseDetection'
 import ObjectDetection from '../views/ObjectDetection'
 import ImageClassification from '../views/ImageClassification'
 import FaceLandmarksDetection from '../views/FaceLandmarksDetection'
 import HandDetection from '../views/HandDetection'
+import HandPoseDetection from '../views/HandPoseDetection'
 
 export const TASK_LINKS = [
   {
-    label: 'Body Segmentation',
-    ref: '/bodysegmentation',
-    component: BodySegmentation
+    label: 'Body Pix (Legacy)',
+    ref: '/bodypix',
+    component: BodyPix
   },
   {
     label: 'Pose Detection',
@@ -27,9 +28,14 @@ export const TASK_LINKS = [
     component: FaceLandmarksDetection
   },
   {
-    label: 'Hand Detection',
+    label: 'Hand Detection (Single)',
     ref: '/handdetection',
     component: HandDetection
+  },
+  {
+    label: 'Hand Pose Detection (Multiple)',
+    ref: '/handposedetection',
+    component: HandPoseDetection
   },
   {
     label: 'Image Classification',
