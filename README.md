@@ -30,6 +30,10 @@ Object Detection
 Pose Detection
 ![alt text](./screenshots/tensorflow-pose-detection.png "Pose Detection")
 
+Face Landmarks Detection
+![alt text](./screenshots/tensorflow-face-landmarks.png "Face Landmarks Detection")
+
+
 ## TensorFlow Models
 Much of the code is taken from the TensorFlow demo models:
 
