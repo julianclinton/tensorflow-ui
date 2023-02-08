@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@tensorflow-models/body-pix": "^2.2.0",
+    "@tensorflow-models/body-segmentation": "^1.0.1",
     "@tensorflow-models/coco-ssd": "^2.2.2",
     "@tensorflow-models/face-landmarks-detection": "^1.0.2",
     "@tensorflow-models/hand-pose-detection": "^2.0.0",
