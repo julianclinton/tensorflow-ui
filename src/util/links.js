@@ -1,4 +1,5 @@
 import BodyPix from '../views/BodyPix'
+import BodySegmentation from '../views/BodySegmentation'
 import PoseDetection from '../views/PoseDetection'
 import ObjectDetection from '../views/ObjectDetection'
 import ImageClassification from '../views/ImageClassification'
@@ -11,6 +12,11 @@ export const TASK_LINKS = [
     label: 'Body Pix (Legacy)',
     ref: '/bodypix',
     component: BodyPix
+  },
+  {
+    label: 'Body Segmentation',
+    ref: '/bodysegmentation',
+    component: BodySegmentation
   },
   {
     label: 'Pose Detection',

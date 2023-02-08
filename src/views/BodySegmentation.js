@@ -10,7 +10,7 @@ import { BODY_PARTS, BAR_CHART_DEFAULTS } from '../util/constants'
 import { drawBoundingBox, drawSkeleton } from '../util/drawing'
 import { createDefaultCategorySeries } from '../util/charts'
 import '@tensorflow/tfjs-backend-webgl'
-const bodyPix = require('@tensorflow-models/body-pix')
+const bodySegmentation = require('@tensorflow-models/body-segmentation')
 
 const DISPLAY_OPTIONS = {
   ...BAR_CHART_DEFAULTS,
@@ -19,26 +19,39 @@ const DISPLAY_OPTIONS = {
   }
 }
 
-export const BodyPix = (props) => {
+const BODY_SEGMENTATION_CONFIG = {
+  runtime: 'mediapipe', // or 'tfjs'
+  solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation',
+  modelType: 'general'
+}
+
+const BLAZE_POSE_CONFIG = {
+  maxPoses: 1,
+  type: 'full',
+  visualization: 'binaryMask'
+}
+
+export const BodySegmentation = (props) => {
   const [model, setModel] = useState(null)
   const [settings, setSettings] = useState({
-    segmentationMode: 'segmentPersonParts',
+    segmentationMode: 'segmentPeople',
     bodyThreshold: 0.3
   })
   const [chartData, setChartData] = useState(createDefaultCategorySeries(BODY_PARTS))
 
   const loadModel = async () => {
-    setModel(await bodyPix.load(/** optional arguments, see docs **/))
+    setModel(await bodySegmentation.createSegmenter(bodySegmentation.SupportedModels.MediaPipeSelfieSegmentation,
+      {
+        ...BODY_SEGMENTATION_CONFIG
+      }))
   }
   
   const getFeatureData = (modelApplyData, settings) => {
     let featureData
     switch (settings.segmentationMode) {
-      case 'segmentPerson':
-      case 'segmentPersonParts':
+      case 'segmentPeople':
         featureData = modelApplyData.allPoses; break
-      case 'segmentMultiPerson':
-      case 'segmentMultiPersonParts':
+      case 'segmentEstimatePoses':
         featureData = modelApplyData.map(entry => entry.pose); break
       default:
         featureData = null
@@ -92,30 +105,28 @@ export const BodyPix = (props) => {
   const applySegmentationModel = async (video, canvas, settings) => {
     /**
      * One of:
-     *   - net.segmentPerson
-     *   - net.segmentPersonParts
-     *   - net.segmentMultiPerson
-     *   - net.segmentMultiPersonParts
+     *   - net.segmentPeople
+     *   - net.segmentEstimatePoses
      * See documentation for details on each method.
      */
     let fn
     switch (settings.segmentationMode) {
-      case 'segmentPerson':
-        fn = model.segmentPerson; break
-      case 'segmentPersonParts':
-        fn = model.segmentPersonParts; break
-      case 'segmentMultiPerson':
-        fn = model.segmentMultiPerson; break
-      case 'segmentMultiPersonParts':
-        fn = model.segmentMultiPersonParts; break
+      case 'segmentPeople':
+        fn = model.segmentPeople; break
+      case 'segmentEstimatePoses':
+        fn = model.estimatePoses; break
       default:
         fn = null
     }
 
     let modelApplyData
     if (fn) {
-      modelApplyData = await fn.call(model, video)
-      updateApplyPanel(modelApplyData, settings)
+      try {
+        modelApplyData = await fn.call(model, video)
+        updateApplyPanel(modelApplyData, settings)
+      } catch (err) {
+        console.log(`Error: ${err.message}`)
+      }
     }
     return modelApplyData
   }
@@ -137,10 +148,8 @@ export const BodyPix = (props) => {
       <Col>
         <Form.Label>Segmentation</Form.Label>
         <Form.Control value={settings.segmentationMode} as='select' onChange={onSegmentationChange}>
-          <option value='segmentPerson'>Person</option>
-          <option value='segmentPersonParts'>Person parts</option>
-          <option value='segmentMultiPerson'>Multi-person</option>
-          <option value='segmentMultiPersonParts'>Multi-person parts</option>
+          <option value='segmentPeople'>People</option>
+          <option value='segmentEstimatePoses'>Estimate poses</option>
         </Form.Control>
       </Col>
       <Col>
@@ -158,7 +167,7 @@ export const BodyPix = (props) => {
 
   return (
     <Fragment>
-      <h2>Body Pix (Legacy)</h2>
+      <h2>Body Segmentation</h2>
       { (model &&
         <VideoPanel
           controlPanel={controlPanel}
@@ -175,4 +184,4 @@ export const BodyPix = (props) => {
   )
 }
 
-export default BodyPix
+export default BodySegmentation
