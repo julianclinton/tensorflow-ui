@@ -111,13 +111,13 @@ const VideoPanel = (props) => {
   const columnsFactor = (props.sourceSize === 'large' || !hasRightPanel) ? 1 : 0
   const videoFactor = hasRightPanel ? columnsFactor : 2
 
-  const video = <video ref={videoRef} autoPlay={true} playsInline
+  const video = <video key='vid' ref={videoRef} autoPlay={true} playsInline
       width={VIDEO_WIDTH + (VIDEO_WIDTH/2 * videoFactor)}
       height={VIDEO_HEIGHT + (VIDEO_HEIGHT/2 * videoFactor)}
       style={PANEL_STYLE}
     />
 
-  const canvas = <canvas ref={canvasRef}
+  const canvas = <canvas key='canvas' ref={canvasRef}
       width={VIDEO_WIDTH + (VIDEO_WIDTH/2 * videoFactor)}
       height={VIDEO_HEIGHT + (VIDEO_HEIGHT/2 * videoFactor)}
       style={PANEL_STYLE}>
@@ -142,15 +142,15 @@ const VideoPanel = (props) => {
         <Col xs={leftPanelWidth - 1}>
           {message}
         </Col>
-        <Col xs={rightPanelWidth}>
+        <Col key={3} xs={rightPanelWidth}>
           {props.controlPanel}
         </Col>
       </Row>
       <Row>
-        <Col xs={leftPanelWidth}>
+        <Col key={1} xs={leftPanelWidth}>
           {leftItems}
         </Col>
-        <Col xs={rightPanelWidth} style={{ height: 2 * VIDEO_HEIGHT }}>
+        <Col key={2} xs={rightPanelWidth} style={{ height: 2 * VIDEO_HEIGHT }}>
           {rightItems}
         </Col>
       </Row>
