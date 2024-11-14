@@ -13,7 +13,7 @@
     "@tensorflow-models/posenet": "^2.2.2",
     "@tensorflow/tfjs": "^4.0.0",
     "apexcharts": "^3.54.1",
-    "bootstrap": "^5.3.2",
+    "bootstrap": "^5.3.3",
     "react": "^17.0.2",
     "react-apexcharts": "^1.5.0",
     "react-bootstrap": "^1.6.8",
