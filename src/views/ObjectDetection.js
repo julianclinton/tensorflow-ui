@@ -69,6 +69,7 @@ export const ObjectSegmentation = (props) => {
     loadModel()
   }, [])
 
+  console.log('chartData', chartData)
   return (
     <Fragment>
       <h2>Object Detection</h2>
@@ -78,7 +79,8 @@ export const ObjectSegmentation = (props) => {
           applyModel={(source, canvas) => applySegmentationModel(source, canvas, null)}
           updateCanvas={(source, canvas, ctx, modelData) => updateCanvas(source, canvas, ctx, modelData, null)}
         >
-          {<Chart options={DISPLAY_OPTIONS} series={chartData} type='bar' height='100%'/>}
+          {/* For some reason this particular bar chart doesn't handle empty data very well, possibly because of no xaxis data initially */}
+          {chartData.length > 0 ? <Chart options={DISPLAY_OPTIONS} series={chartData} type='bar' height='100%'/> : <div height='100%' width='100%'/>}
         </VideoPanel>)
         || <Loading message={'Loading model...'}/>
       }
