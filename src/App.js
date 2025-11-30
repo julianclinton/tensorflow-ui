@@ -1,4 +1,5 @@
-import { Switch, Route } from 'react-router-dom'
+import React from 'react'
+import { Routes, Route } from 'react-router'
 import Container from 'react-bootstrap/Container'
 import Nav from 'react-bootstrap/Nav'
 import Navbar from 'react-bootstrap/Navbar'
@@ -22,11 +23,11 @@ const App = () => {
           </Nav>
         </Navbar.Collapse>
       </Navbar>      
-      <Switch>
-        <Route exact path="/" component={Home} />
-        { TASK_LINKS.map((entry, i) => <Route key={`task-${i}`} path={entry.ref} title={entry.label} component={entry.component}/>) }
-        <Route path="*" component={NotFoundPage} />
-      </Switch>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        { TASK_LINKS.map((entry, i) => <Route key={`task-${i}`} path={entry.ref} title={entry.label} element={React.createElement(entry.component)} />) }
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
     </Container>
   )
 }
