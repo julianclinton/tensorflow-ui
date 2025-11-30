@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter } from 'react-router'
 import App from './App'
 
 test('renders learn react link', () => {
