@@ -4,9 +4,9 @@ import Loading from '../components/Loading'
 import VideoPanel from '../components/VideoPanel'
 import { BAR_CHART_DEFAULTS } from '../util/constants'
 import { OBJECT_BOX_COLOR } from '../util/drawing'
-require('@tensorflow/tfjs-backend-cpu')
-require('@tensorflow/tfjs-backend-webgl')
-const cocoSsd = require('@tensorflow-models/coco-ssd')
+import '@tensorflow/tfjs-backend-cpu'
+import '@tensorflow/tfjs-backend-webgl'
+import * as cocoSsd from '@tensorflow-models/coco-ssd'
 
 const DISPLAY_OPTIONS = { ...BAR_CHART_DEFAULTS }
 

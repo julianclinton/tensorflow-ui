@@ -3,27 +3,43 @@ import Form from 'react-bootstrap/Form'
 import Col from 'react-bootstrap/Col'
 import Row from 'react-bootstrap/Row'
 import RangeSlider from 'react-bootstrap-range-slider'
-import Chart from 'react-apexcharts'
 import Loading from '../components/Loading'
 import VideoPanel from '../components/VideoPanel'
-import { BODY_PARTS, BAR_CHART_DEFAULTS } from '../util/constants'
-import { drawBoundingBox, drawSkeleton } from '../util/drawing'
-import { createDefaultCategorySeries } from '../util/charts'
 import '@tensorflow/tfjs-backend-webgl'
-const bodySegmentation = require('@tensorflow-models/body-segmentation')
+import '@mediapipe/selfie_segmentation'
+import * as bodySegmentation from '@tensorflow-models/body-segmentation'
 
-const DISPLAY_OPTIONS = {
-  ...BAR_CHART_DEFAULTS,
-  xaxis: {
-    categories: BODY_PARTS
+const MASK_OPTIONS = [
+  {
+    label: 'Binary',
+    value: 'binary'
+  },
+  {
+    label: 'Coloured',
+    value: 'coloured'
   }
-}
+]
 
-const BODY_SEGMENTATION_CONFIG = {
-  runtime: 'mediapipe', // or 'tfjs'
-  solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation',
-  modelType: 'general'
-}
+const DRAW_OPTIONS = [
+  {
+    label: 'Mask',
+    value: 'mask'
+  },
+  {
+    label: 'Pixelated mask',
+    value: 'pixelatedMask'
+  },
+  {
+    label: 'Bokeh',
+    value: 'bokeh'
+  }
+]
+
+// const BODY_SEGMENTATION_CONFIG = {
+//   runtime: 'mediapipe', // or 'tfjs'
+//   solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation',
+//   modelType: 'general'
+// }
 
 const BLAZE_POSE_CONFIG = {
   maxPoses: 1,
@@ -36,17 +52,29 @@ export const BodySegmentation = (props) => {
   const [retry, setRetry] = useState(false)
   const [model, setModel] = useState(null)
   const [settings, setSettings] = useState({
-    segmentationMode: 'segmentPeople',
-    bodyThreshold: 0.3
+    multiSegmentation: true,
+    segmentBodyParts: true,
+    maskMode: MASK_OPTIONS[0].value,
+    drawMode: DRAW_OPTIONS[0].value,
+    opacity: 0.7,
+    blurAmount: 0,
+    foregroundThreshold: 0.5,
+    backgroundBlurAmount: 3,
+    edgeBlurAmount: 3,
+    pixelCellWidth: 10.0
   })
-  const [chartData, setChartData] = useState(createDefaultCategorySeries(BODY_PARTS))
 
   const loadModel = async () => {
     try {
-      setModel(await bodySegmentation.createSegmenter(bodySegmentation.SupportedModels.MediaPipeSelfieSegmentation,
-        {
-          ...BODY_SEGMENTATION_CONFIG
-        }))
+      // const segmenter = await bodySegmentation.createSegmenter(bodySegmentation.SupportedModels.MediaPipeSelfieSegmentation,
+      //   {
+      //     ...BODY_SEGMENTATION_CONFIG
+      //   })
+      // const segmenter = await bodySegmentation.createSegmenter(bodySegmentation.SupportedModels.MediaPipeSelfieSegmentation,
+      //   { runtime: 'tfjs', modelType: 'general' }
+      // )
+      const segmenter = await bodySegmentation.createSegmenter(bodySegmentation.SupportedModels.BodyPix)
+      setModel(segmenter)
     } catch (err) {
       // This can be called in parallel when React.StrictMode is enabled so just catch and ignore
       console.log(`Error loading model: ${err.message}`)
@@ -55,98 +83,77 @@ export const BodySegmentation = (props) => {
   }
   
   const getFeatureData = (modelApplyData, settings) => {
-    let featureData
-    switch (settings.segmentationMode) {
-      case 'segmentPeople':
-        featureData = modelApplyData.allPoses; break
-      case 'segmentEstimatePoses':
-        featureData = modelApplyData.map(entry => entry.pose); break
-      default:
-        featureData = null
-    }
-    return featureData
+    return modelApplyData
   }
 
   const updateCanvas = async (source, canvas, ctx, modelApplyData, settings) => {
     const featureData = getFeatureData(modelApplyData, settings)
     if (featureData) {
-      featureData.forEach((body, bodyIndex) => {
-        // Apply the threshold when low confidence that this person exists
-        // console.log(`body ${bodyIndex}: score=${body.score}, threshold=${settings.bodyThreshold}`)
-        if (body.score > settings.bodyThreshold) {
-          drawBoundingBox(body.keypoints, ctx)
-          drawSkeleton(body.keypoints, 0.1, ctx, 1)
+      let coloredPartImage
+      const flipHorizontal = false
+      if (settings.maskMode === 'binary') {
+        coloredPartImage = await bodySegmentation.toBinaryMask(featureData);
+      } else if (settings.maskMode === 'coloured') {
+        coloredPartImage = await bodySegmentation.toColoredMask(featureData, bodySegmentation.bodyPixMaskValueToRainbowColor, {r: 255, g: 255, b: 255, a: 255});
+      }
+
+      if (coloredPartImage) {
+        if (settings.drawMode === 'pixelatedMask') {
+          bodySegmentation.drawPixelatedMask(
+            canvas, source, coloredPartImage, settings.opacity, settings.blurAmount,
+            flipHorizontal, settings.pixelCellWidth)
+          } else if (settings.drawMode === 'bokeh') {
+          bodySegmentation.drawBokehEffect(
+            canvas, source, featureData, settings.foregroundThreshold,
+            settings.backgroundBlurAmount, settings.edgeBlurAmount,
+            flipHorizontal)
+        } else {
+          bodySegmentation.drawMask(
+            canvas, source, coloredPartImage, settings.opacity, settings.blurAmount,
+            flipHorizontal)
         }
-      })
+      }
     }
-  }
-
-  const updateApplyPanel = async (modelApplyData, settings) => {
-    const featureData = getFeatureData(modelApplyData, settings)
-
-    let data = []
-    if (featureData) {
-      featureData.forEach((body, bodyIndex) => {
-        // Apply the threshold when low confidence that this person exists
-        // console.log(`body ${bodyIndex}: score=${body.score}, threshold=${settings.bodyThreshold}`)
-        if (body.score > settings.bodyThreshold) {
-          const bodyData = body.keypoints.map((entry) => {
-              return {
-              x: entry.part,
-              y: entry.score
-            }
-          })
-
-          data.push({
-            name: `body-${bodyIndex + 1}`,
-            data: bodyData
-          })
-        }
-      })
-    } else {
-      data = createDefaultCategorySeries(BODY_PARTS)
-    }
-
-    setChartData(data)
   }
 
   const applySegmentationModel = async (video, canvas, settings) => {
-    /**
-     * One of:
-     *   - net.segmentPeople
-     *   - net.segmentEstimatePoses
-     * See documentation for details on each method.
-     */
-    let fn
-    switch (settings.segmentationMode) {
-      case 'segmentPeople':
-        fn = model.segmentPeople; break
-      case 'segmentEstimatePoses':
-        fn = model.estimatePoses; break
-      default:
-        fn = null
+    let modelApplyData
+    try {
+      modelApplyData = await model.segmentPeople(video,
+        { multiSegmentation: settings.multiSegmentation, segmentBodyParts: settings.segmentBodyParts })
+    } catch (err) {
+      console.log(`Error: ${err.message}`)
     }
 
-    let modelApplyData
-    if (fn) {
-      try {
-        modelApplyData = await fn.call(model, video)
-        updateApplyPanel(modelApplyData, settings)
-      } catch (err) {
-        console.log(`Error: ${err.message}`)
-      }
-    }
     return modelApplyData
   }
 
-  const onSegmentationChange = (event) => {
-    setSettings({ ...settings, segmentationMode: event.target.value })
+  // Control panel handlers
+  const onMaskChange = (event) => {
+    setSettings({ ...settings, maskMode: event.target.value })
+  }
+  const onDrawChange = (event) => {
+    setSettings({ ...settings, drawMode: event.target.value })
+  }
+  const onOpacityChange = (event) => {
+    setSettings({ ...settings, opacity: event.target.value })
+  }
+  const onBlurAmountChange = (event) => {
+    setSettings({ ...settings, blurAmount: event.target.value })
+  }
+  const onPixelSizeChange = (event) => {
+    setSettings({ ...settings, pixelCellWidth: event.target.value })
+  }
+  const onForegroundThresholdAmountChange = (event) => {
+    setSettings({ ...settings, foregroundThreshold: event.target.value })
+  }
+  const onBackgroundBlurAmountChange = (event) => {
+    setSettings({ ...settings, backgroundBlurAmount: event.target.value })
+  }
+  const onEdgeBlurAmountChange = (event) => {
+    setSettings({ ...settings, edgeBlurAmount: event.target.value })
   }
 
-  const onBodyThresholdChange = (event) => {
-    setSettings({ ...settings, bodyThreshold: event.target.value })
-  }
-  
   useEffect(() => {
     loadModel()
   }, [retry])
@@ -154,20 +161,83 @@ export const BodySegmentation = (props) => {
   const controlPanel = <Form>
     <Row>
       <Col>
-        <Form.Label>Segmentation</Form.Label>
-        <Form.Control value={settings.segmentationMode} as='select' onChange={onSegmentationChange}>
-          <option value='segmentPeople'>People</option>
-          <option value='segmentEstimatePoses'>Estimate poses</option>
+        <Form.Label>Mask options</Form.Label>
+        <Form.Control value={settings.maskMode} as='select' onChange={onMaskChange}>
+          {MASK_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>{option.label}</option>
+          ))}
         </Form.Control>
       </Col>
       <Col>
-        <Form.Label>Body threshold</Form.Label>
+        <Form.Label>Draw options</Form.Label>
+        <Form.Control value={settings.drawMode} as='select' onChange={onDrawChange}>
+          {DRAW_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>{option.label}</option>
+          ))}
+        </Form.Control>
+      </Col>
+    </Row>
+    <Row>
+      <Col>
+        <Form.Label>Opacity</Form.Label>
         <RangeSlider
-          value={settings.bodyThreshold}
+          value={settings.opacity}
           min={0.0}
           max={1.0}
-          step={0.02}
-          onChange={onBodyThresholdChange}
+          step={0.05}
+          onChange={onOpacityChange}
+        />   
+      </Col>
+      <Col>
+        <Form.Label>Blur (Mask options)</Form.Label>
+        <RangeSlider
+          value={settings.blurAmount}
+          min={0}
+          max={20}
+          step={1}
+          onChange={onBlurAmountChange}
+        />   
+      </Col>
+      <Col>
+        <Form.Label>Pixel size (Pixelated)</Form.Label>
+        <RangeSlider
+          value={settings.pixelCellWidth}
+          min={1.0}
+          max={20.0}
+          step={1}
+          onChange={onPixelSizeChange}
+        />   
+      </Col>
+    </Row>
+    <Row>
+      <Col>
+        <Form.Label>Threshold (Bokeh)</Form.Label>
+        <RangeSlider
+          value={settings.foregroundThreshold}
+          min={0.0}
+          max={1.0}
+          step={0.05}
+          onChange={onForegroundThresholdAmountChange}
+        />   
+      </Col>
+      <Col>
+        <Form.Label>Background blur (Bokeh)</Form.Label>
+        <RangeSlider
+          value={settings.backgroundBlurAmount}
+          min={1}
+          max={20}
+          step={1}
+          onChange={onBackgroundBlurAmountChange}
+        />   
+      </Col>
+      <Col>
+        <Form.Label>Edge blur (Bokeh)</Form.Label>
+        <RangeSlider
+          value={settings.edgeBlurAmount}
+          min={0}
+          max={20}
+          step={1}
+          onChange={onEdgeBlurAmountChange}
         />   
       </Col>
     </Row>
@@ -184,7 +254,6 @@ export const BodySegmentation = (props) => {
           applyModel={(source, canvas) => applySegmentationModel(source, canvas, settings)}
           updateCanvas={(source, canvas, ctx, modelData) => updateCanvas(source, canvas, ctx, modelData, settings)}
         >
-          {<Chart options={DISPLAY_OPTIONS} series={chartData} type='bar' height='100%'/>}
         </VideoPanel>)
         || <Loading message={'Loading model...'}/>
       }

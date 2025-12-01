@@ -8,7 +8,7 @@ import { BODY_PARTS, BAR_CHART_DEFAULTS } from '../util/constants'
 import { drawBoundingBox, drawSkeleton } from '../util/drawing'
 import { createDefaultCategorySeries } from '../util/charts'
 import '@tensorflow/tfjs-backend-webgl'
-const posenet = require('@tensorflow-models/posenet')
+import * as posenet from '@tensorflow-models/posenet'
 
 const DISPLAY_OPTIONS = {
   ...BAR_CHART_DEFAULTS,

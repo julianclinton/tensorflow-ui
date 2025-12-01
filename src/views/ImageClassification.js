@@ -8,9 +8,9 @@ import Loading from '../components/Loading'
 import VideoPanel from '../components/VideoPanel'
 import { BAR_CHART_DEFAULTS } from '../util/constants'
 import { padChartSeries, createDefaultSeries } from '../util/charts'
-require('@tensorflow/tfjs-backend-cpu')
-require('@tensorflow/tfjs-backend-webgl')
-const mobilenet = require('@tensorflow-models/mobilenet')
+import '@tensorflow/tfjs-backend-cpu'
+import '@tensorflow/tfjs-backend-webgl'
+import * as mobilenet from '@tensorflow-models/mobilenet'
 
 const Y_AXIS_WIDTH = 240
 
