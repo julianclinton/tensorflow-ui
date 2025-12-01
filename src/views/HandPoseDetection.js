@@ -7,7 +7,7 @@ import Loading from '../components/Loading'
 import VideoPanel from '../components/VideoPanel'
 import { drawPoint, drawPath } from '../util/drawing'
 import '@tensorflow/tfjs-backend-webgl'
-const handdetection = require('@tensorflow-models/hand-pose-detection')
+import * as handdetection from '@tensorflow-models/hand-pose-detection'
 
 const FINGER_LOOKUP_INDICES = {
   thumb: [0, 1, 2, 3, 4],

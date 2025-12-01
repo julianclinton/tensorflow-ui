@@ -3,7 +3,7 @@ import Loading from '../components/Loading'
 import VideoPanel from '../components/VideoPanel'
 import { SKELETON_COLOR, drawPoint, drawPath } from '../util/drawing'
 import '@tensorflow/tfjs-backend-webgl'
-const handpose = require('@tensorflow-models/handpose')
+import * as handpose from '@tensorflow-models/handpose'
 
 const FINGER_LOOKUP_INDICES = {
   thumb: [0, 1, 2, 3, 4],

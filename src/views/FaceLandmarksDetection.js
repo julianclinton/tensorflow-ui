@@ -12,9 +12,9 @@ import { BAR_CHART_DEFAULTS } from '../util/constants'
 import { padChartSeries, createDefaultSeries } from '../util/charts'
 import { GREEN, RED, distance, drawPath } from '../util/drawing'
 import { TRIANGULATION } from '../util/triangulation'
-require('@tensorflow/tfjs-backend-cpu')
-require('@tensorflow/tfjs-backend-webgl')
-const faceLandmarksDetection = require('@tensorflow-models/face-landmarks-detection')
+import '@tensorflow/tfjs-backend-cpu'
+import '@tensorflow/tfjs-backend-webgl'
+import * as faceLandmarksDetection from '@tensorflow-models/face-landmarks-detection'
 
 const DISPLAY_OPTIONS = { ...BAR_CHART_DEFAULTS }
 

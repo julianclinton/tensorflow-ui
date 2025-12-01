@@ -10,7 +10,7 @@ import { BODY_PARTS, BAR_CHART_DEFAULTS } from '../util/constants'
 import { drawBoundingBox, drawSkeleton } from '../util/drawing'
 import { createDefaultCategorySeries } from '../util/charts'
 import '@tensorflow/tfjs-backend-webgl'
-const bodyPix = require('@tensorflow-models/body-pix')
+import * as bodyPix from '@tensorflow-models/body-pix'
 
 const DISPLAY_OPTIONS = {
   ...BAR_CHART_DEFAULTS,
