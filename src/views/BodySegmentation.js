@@ -32,6 +32,8 @@ const BLAZE_POSE_CONFIG = {
 }
 
 export const BodySegmentation = (props) => {
+  // Hack to get around React.StrictMode double invoking useEffect twice
+  const [retry, setRetry] = useState(false)
   const [model, setModel] = useState(null)
   const [settings, setSettings] = useState({
     segmentationMode: 'segmentPeople',
@@ -40,10 +42,16 @@ export const BodySegmentation = (props) => {
   const [chartData, setChartData] = useState(createDefaultCategorySeries(BODY_PARTS))
 
   const loadModel = async () => {
-    setModel(await bodySegmentation.createSegmenter(bodySegmentation.SupportedModels.MediaPipeSelfieSegmentation,
-      {
-        ...BODY_SEGMENTATION_CONFIG
-      }))
+    try {
+      setModel(await bodySegmentation.createSegmenter(bodySegmentation.SupportedModels.MediaPipeSelfieSegmentation,
+        {
+          ...BODY_SEGMENTATION_CONFIG
+        }))
+    } catch (err) {
+      // This can be called in parallel when React.StrictMode is enabled so just catch and ignore
+      console.log(`Error loading model: ${err.message}`)
+      setRetry(true) // Trigger another attempt
+    }
   }
   
   const getFeatureData = (modelApplyData, settings) => {
@@ -141,7 +149,7 @@ export const BodySegmentation = (props) => {
   
   useEffect(() => {
     loadModel()
-  }, [])
+  }, [retry])
 
   const controlPanel = <Form>
     <Row>
